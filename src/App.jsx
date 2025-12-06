@@ -5,7 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'remixicon/fonts/remixicon.css'
 import "react-toastify/dist/ReactToastify.css";
 
-const API_KEY = "AE9YiVDD7mkC68eiJfyZ029aZeofeFPGvUDb69DLh8ck3UJmvvtNgT2L";
+const API_KEY = "YOUR_PEXELS_API_KEY";
 
 const App = () => {
   const [photos, setPhotos] = useState([]);
@@ -13,7 +13,22 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("nature");
 
-  // API CALL
+  // ⭐ DOWNLOAD FUNCTION (100% WORKING)
+  const downloadImage = async (url, filename) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      toast.error("Failed to download!");
+    }
+  };
+
+  // Fetch Images
   const fetchImages = async () => {
     try {
       setLoading(true);
@@ -40,27 +55,24 @@ const App = () => {
     setPage((prev) => prev + 1);
   };
 
-  // Search Logic
+  // Search Function
   const search = (e) => {
     e.preventDefault();
-
     let q = e.target.search.value.trim();
-
     if (!q) return;
 
-    setPhotos([]);  // reset old photos
-    setPage(1);     // reset page
-    setQuery(q);    // new keyword
+    setPhotos([]);
+    setPage(1);
+    setQuery(q);
   };
 
-  // Fetch images on query or page change
   useEffect(() => {
     fetchImages();
   }, [page, query]);
 
   return (
     <div className='bg-gray-100 min-h-screen flex flex-col items-center py-8 gap-12 animate__animated animate__fadeIn'>
-      
+
       <h1 className='text-4xl font-bold text-indigo-600'>
         📷 Image Gallery – {query}
       </h1>
@@ -69,7 +81,7 @@ const App = () => {
         <input
           name="search"
           className='p-3 bg-white rounded-l-lg w-[400px] focus:outline-indigo-600'
-          placeholder='Search image here...'
+          placeholder='Search images...'
           required
         />
         <button className='bg-gradient-to-br from-indigo-600 via-blue-500 to-indigo-600
@@ -85,7 +97,7 @@ const App = () => {
       )}
 
       <div className='grid lg:grid-cols-4 lg:gap-12 gap-8 w-9/12'>
-        
+
         {photos.map((item, index) => (
           <div key={index} className='bg-white rounded-xl shadow'>
             <img
@@ -98,26 +110,25 @@ const App = () => {
                 {item.photographer}
               </h1>
 
-              <a
-                target='_blank'
-                href={item.src.original}
-                className='mt-3 block bg-green-500 font-bold py-2 rounded-lg text-center 
+              {/* ⭐ Updated Download Button */}
+              <button
+                onClick={() => downloadImage(item.src.original, `image-${index}.jpg`)}
+                className='mt-3 bg-green-500 font-bold py-2 rounded-lg text-center text-white w-full
                 hover:scale-105 transition-transform duration-300'
               >
                 <i className='ri-download-line mr-1'></i> Download
-              </a>
+              </button>
+
             </div>
           </div>
         ))}
 
-        {/* Loader Center */}
         {loading && (
           <div className="col-span-full flex justify-center">
             <i className="ri-loader-4-line text-4xl text-gray-400 animate-spin"></i>
           </div>
         )}
 
-        {/* Load More Center */}
         {photos.length > 0 && !loading && (
           <div className="col-span-full flex justify-center">
             <button
@@ -138,3 +149,4 @@ const App = () => {
 };
 
 export default App;
+
